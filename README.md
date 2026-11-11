@@ -32,6 +32,15 @@ Cada activitat indica si ve d'una **fitxa original** (PDF en paper) o és una **
 `associa` (picto → paraula) · `llegeix` (paraula → picto) · `inicial` · `lletra` · `sillabes` · `omple` (graella) ·
 `classifica` · `relaciona` · `memory` · `intrus` · `escolta` · `sino` · `endevinalla`
 
+## Alumnes i seguiment
+
+- En obrir l'app surt «Qui ets?»: es tria el nom de l'alumne o es crea amb «Alumne nou» (no deixa repetir noms).
+- La mirada comença sempre **desactivada**; s'activa amb el botó «Mirada» de la pantalla d'entrada.
+- Cada activitat que es fa (acabada o deixada a mitges) es registra: data, encerts a la primera, errors, temps i quines paraules ha fallat.
+- **Zona del professional** (roda dentada, protegida amb PIN de 4 xifres): seguiment per alumne, historial,
+  paraules amb més errors, descàrrega en Excel (CSV), gestió d'alumnes i configuració.
+- Les dades es guarden **només en el navegador de l'ordinador** on es fan servir.
+
 ## Veu
 
 - **Veu del sistema**: fa servir les veus instal·lades a l'ordinador (busca'n una de catalana).

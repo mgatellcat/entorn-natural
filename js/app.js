@@ -24,7 +24,19 @@
   };
   let C = { ...DEF };
   try { Object.assign(C, JSON.parse(localStorage.getItem("entorn-config") || "{}")); } catch (e) {}
+  C.mirada = false; // el programa comença sempre amb la mirada desactivada
   const desa = () => { try { localStorage.setItem("entorn-config", JSON.stringify(C)); } catch (e) {} };
+
+  /* ---------------- alumnes i seguiment (només en aquest navegador) ---------------- */
+  const D = { alumnes: [], registres: [], pin: null };
+  try { Object.assign(D, JSON.parse(localStorage.getItem("entorn-dades") || "{}")); } catch (e) {}
+  const desaD = () => { try { localStorage.setItem("entorn-dades", JSON.stringify(D)); return true; } catch (e) { return false; } };
+  const norm = s => s.trim().replace(/\s+/g, " ").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  let alumne = null;
+  try { const id = sessionStorage.getItem("entorn-alumne"); alumne = D.alumnes.find(x => x.id === id) || null; } catch (e) {}
+  const entra = al => { alumne = al; try { al ? sessionStorage.setItem("entorn-alumne", al.id) : sessionStorage.removeItem("entorn-alumne"); } catch (e) {} };
+  let profOk = false;  // PIN validat en aquesta sessió
+  let actual = null;   // activitat en curs (per desar-la si es deixa a mitges)
 
   /* ---------------- utilitats ---------------- */
   const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.random() * (i + 1) | 0; [a[i], a[j]] = [a[j], a[i]]; } return a; };
@@ -48,6 +60,10 @@
     altaveu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8.5 8.5 0 010 12"/></svg>',
     config: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
     llibre: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg>',
+    persona: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
+    ull: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
+    baixa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>',
+    esborra: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/></svg>',
     ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>',
     repetir: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0115.5-6.2L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 01-15.5 6.2L3 16"/><path d="M3 21v-5h5"/></svg>',
     estrella: '<svg viewBox="0 0 24 24"><path d="M12 2.5l2.9 6 6.6.9-4.8 4.6 1.2 6.5L12 17.4l-5.9 3.1 1.2-6.5L2.5 9.4l6.6-.9z" fill="#f5b400" stroke="#b07f00" stroke-width="1"/></svg>',
@@ -55,21 +71,16 @@
   };
 
   /* ---------------- pictograma ---------------- */
-  // mida de lletra (en % de l'amplada del requadre) segons la longitud de la paraula
+  // amplada real del text en Arial negreta (en "em"), per fer-lo cabre sempre en una sola línia
+  const mesura = (() => {
+    const ctx = document.createElement("canvas").getContext("2d"), cau = {};
+    return t => { if (!(t in cau)) { ctx.font = "700 100px Arial, Helvetica, 'Liberation Sans', sans-serif"; cau[t] = ctx.measureText(t).width / 100; } return cau[t]; };
+  })();
+  // mida de lletra (en % de l'amplada disponible) perquè el text hi càpiga en una línia
+  const ajusta = (t, disp, max) => Math.min(max, disp / Math.max(mesura(t), 0.5));
+  // mida de la paraula dins el requadre del pictograma: una línia; si és llarga, lletra més petita
   function midaLletra(w) {
-    const parts = w.split(" ");
-    let linies = [w];
-    if (w.length > 11 && parts.length > 1) { // parteix en dues línies equilibrades
-      let millor = null;
-      for (let i = 1; i < parts.length; i++) {
-        const a = parts.slice(0, i).join(" "), b = parts.slice(i).join(" ");
-        const m = Math.max(a.length, b.length);
-        if (!millor || m < millor.m) millor = { m, l: [a, b] };
-      }
-      linies = millor.l;
-    }
-    const llarg = Math.max(...linies.map(l => l.length));
-    return { fs: Math.min(16, 118 / Math.max(llarg, 1)), html: linies.map(esc).join("<br>") };
+    return { fs: ajusta(w, 80, 15), html: esc(w) };
   }
   function picto(w, etiqueta = true) {
     const v = V[w];
@@ -211,12 +222,23 @@
   /* ---------------- navegació ---------------- */
   function vesA(h) { if (location.hash === "#" + h) ruta(); else location.hash = h; }
   window.addEventListener("hashchange", ruta);
+  const ZONA_PROF = ["seguiment", "gestio-alumnes", "configuracio"];
   function ruta() {
+    if (actual && !actual.desat) actual.desa(false); // activitat deixada a mitges
+    actual = null;
     token++; Veu.atura(); reiniciaDwell(); M.pausaFins = performance.now() + 600;
+    document.querySelectorAll(".reforc").forEach(x => x.remove());
     const h = location.hash.slice(1);
+    if (ZONA_PROF.includes(h)) {
+      if (!profOk) return pintaPin(h);
+      if (h === "seguiment") return pintaSeguiment();
+      if (h === "gestio-alumnes") return pintaGestio();
+      return pintaConfig();
+    }
+    if (h === "nou-alumne") return pintaNouAlumne();
+    if (!alumne) return pintaEntrada();
     if (h.startsWith("bloc-")) return pintaBloc(h.slice(5), 0);
     if (h.startsWith("act-")) { const a = ACTS.find(x => x.codi.toLowerCase() === h.slice(4).toLowerCase()); if (a) return comenca(a); }
-    if (h === "configuracio") return pintaConfig();
     if (h === "vocabulari") return pintaVocab();
     pintaPortada();
   }
@@ -228,8 +250,10 @@
       <header class="portada-cap">
         <div class="titol"><div class="eyebrow">Aula de grans · CEE</div><h1>Coneixement de l'entorn natural</h1></div>
         <div class="eines">
+          <span class="qui">${avatar(alumne.nom)}<b>${esc(alumne.nom)}</b></span>
+          <button class="btn-txt sel" data-canvia>${ICO.persona} Canvia d'alumne</button>
           <button class="btn-ico sel" data-go="vocabulari" aria-label="Vocabulari">${ICO.llibre}</button>
-          <button class="btn-ico sel" data-go="configuracio" aria-label="Configuració">${ICO.config}</button>
+          <button class="btn-ico sel" data-go="seguiment" aria-label="Zona del professional">${ICO.config}</button>
         </div>
       </header>
       <nav class="blocs">${BLOCS.map(b => {
@@ -242,6 +266,73 @@
       <div class="peu">Pictogrames: Sergio Palao · ARASAAC (arasaac.org) · CC BY-NC-SA · Govern d'Aragó</div>
     </section>`;
     on("[data-go]", e => { const g = e.currentTarget.dataset.go; const b = BLOCS.find(x => "bloc-" + x.id === g); if (b) Veu.parla(b.nom); vesA(g); });
+    on("[data-canvia]", () => { entra(null); vesA("entrar"); });
+  }
+
+  /* ---------------- entrada d'alumnes ---------------- */
+  function avatar(nom) {
+    let h = 0; for (const c of nom) h = (h * 31 + c.charCodeAt(0)) % 360;
+    return `<span class="avatar" style="--h:${h}">${esc(nom.trim()[0] || "?").toUpperCase()}</span>`;
+  }
+  function botoMirada() {
+    return `<button class="btn-txt sel ${C.mirada ? "prim" : ""}" data-mirada>${ICO.ull} Mirada: ${C.mirada ? "activada" : "desactivada"}</button>`;
+  }
+  function connectaMirada(repinta) {
+    on("[data-mirada]", () => { C.mirada = !C.mirada; aplicaMirada(); repinta(); });
+  }
+  function pintaEntrada() {
+    const llista = D.alumnes.slice().sort((a, b) => a.nom.localeCompare(b.nom, "ca"));
+    app.innerHTML = `<section class="pantalla scroll">
+      <header class="portada-cap">
+        <div class="titol"><div class="eyebrow">Aula de grans · CEE</div><h1>Coneixement de l'entorn natural</h1></div>
+        <div class="eines">${botoMirada()}
+          <button class="btn-ico sel" data-go="seguiment" aria-label="Zona del professional">${ICO.config}</button></div>
+      </header>
+      <h2 class="pregunta">Qui ets?</h2>
+      <div class="alumnes">
+        ${llista.map(a => `<button class="alumne sel" data-id="${a.id}">${avatar(a.nom)}<span>${esc(a.nom)}</span></button>`).join("")}
+        <button class="alumne nou sel" data-nou><span class="avatar mes">+</span><span>Alumne nou</span></button>
+      </div>
+      ${llista.length ? "" : `<p class="nota-buida">Encara no hi ha cap alumne. Toca «Alumne nou» per crear-ne un.</p>`}
+    </section>`;
+    connectaMirada(pintaEntrada);
+    on("[data-go]", () => vesA("seguiment"));
+    on("[data-nou]", () => vesA("nou-alumne"));
+    on("[data-id]", e => {
+      const al = D.alumnes.find(x => x.id === e.currentTarget.dataset.id); if (!al) return;
+      entra(al); Veu.parla(`Hola, ${al.nom}!`); vesA("inici");
+    });
+  }
+  function pintaNouAlumne() {
+    app.innerHTML = `<section class="pantalla scroll">
+      <header class="cap"><button class="btn-ico gran sel" data-tornar aria-label="Tornar">${ICO.enrere}</button>
+        <div class="titol"><h2>Alumne nou</h2><span class="sub">El nom es guarda només en aquest ordinador</span></div></header>
+      <form class="form-nom" id="form-nom" autocomplete="off">
+        <label for="nom-alumne">Nom de l'alumne</label>
+        <input id="nom-alumne" maxlength="30" placeholder="Per exemple: Marta" autocomplete="off">
+        <p class="avis" id="avis-nom" role="alert" hidden></p>
+        <div class="accions-form"><button type="submit" class="btn-txt prim sel">${ICO.ok} Crea i entra</button>
+          <button type="button" class="btn-txt sel" data-tornar>Cancel·la</button></div>
+      </form>
+    </section>`;
+    const inp = document.getElementById("nom-alumne"), avis = document.getElementById("avis-nom");
+    setTimeout(() => inp.focus(), 50);
+    inp.addEventListener("input", () => { avis.hidden = true; });
+    on("[data-tornar]", () => vesA("entrar"));
+    document.getElementById("form-nom").addEventListener("submit", e => {
+      e.preventDefault();
+      const nom = inp.value.trim().replace(/\s+/g, " ");
+      if (!nom) { avis.textContent = "Escriu el nom de l'alumne."; avis.hidden = false; return; }
+      const igual = D.alumnes.find(x => norm(x.nom) === norm(nom));
+      if (igual) {
+        avis.textContent = `Ja hi ha un alumne que es diu «${igual.nom}». Tria'l a la llista o escriu un altre nom.`;
+        avis.hidden = false; Veu.parla("Aquest nom ja existeix."); inp.focus(); return;
+      }
+      const al = { id: "a" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6), nom, creat: new Date().toISOString() };
+      D.alumnes.push(al);
+      if (!desaD()) { avis.textContent = "No s'ha pogut desar. Aquest navegador no permet guardar dades."; avis.hidden = false; return; }
+      entra(al); Veu.parla(`Hola, ${nom}!`); vesA("inici");
+    });
   }
 
   /* ---------------- bloc ---------------- */
@@ -298,7 +389,7 @@
     rondes: a => { const ws = paraulesDe(a); return sample(ws, C.rondes).map(w => ({ w, ops: opcionsAmb(w, ws, a.opcions || 3) })); },
     pinta(r, e, api) {
       e.innerHTML = `<div class="dos"><div><div class="zona"><div class="ajust">${picto(r.w, false)}</div></div></div>
-        <div class="paraules">${r.ops.map(o => `<button class="paraula opc sel fz${V[o].t}" data-w="${esc(o)}"><span>${esc(o)}</span></button>`).join("")}</div></div>`;
+        <div class="paraules">${r.ops.map(o => `<button class="paraula opc sel fz${V[o].t}" data-w="${esc(o)}"><span style="font-size:min(48cqh, ${ajusta(o, 92, 11).toFixed(2)}cqw, 90px)">${esc(o)}</span></button>`).join("")}</div></div>`;
       api.opcions(e, o => o === r.w, r.w);
     }
   };
@@ -306,7 +397,7 @@
   T.llegeix = {
     rondes: a => { const ws = paraulesDe(a); return sample(ws, C.rondes).map(w => ({ w, ops: opcionsAmb(w, ws, a.opcions || 3) })); },
     pinta(r, e, api) {
-      e.innerHTML = `<div class="paraula-gran fz${V[r.w].t}"><span>${esc(r.w)}</span></div>
+      e.innerHTML = `<div class="paraula-gran fz${V[r.w].t}"><span style="font-size:min(clamp(40px, 9vmin, 120px), ${ajusta(r.w, 92, 60).toFixed(2)}cqw)">${esc(r.w)}</span></div>
         <div class="zona"><div class="ajust" style="--cols:${r.ops.length}">${r.ops.map(o => `<button class="opc sel" data-w="${esc(o)}">${picto(o, false)}</button>`).join("")}</div></div>`;
       api.opcions(e, o => o === r.w, r.w);
     }
@@ -324,7 +415,7 @@
   }
   function pintaLletra(r, e, api) {
     e.innerHTML = `<div class="dos"><div><div class="zona"><div class="ajust">${picto(r.w, false)}</div></div></div>
-      <div><div class="mot">${[...r.w].map((c, i) => `<b class="${i === r.pos ? "forat" : ""}">${i === r.pos ? "?" : esc(c)}</b>`).join("")}</div>
+      <div class="col-dreta"><div class="mot" style="--n:${r.w.length}">${[...r.w].map((c, i) => `<b class="${i === r.pos ? "forat" : ""}">${i === r.pos ? "?" : esc(c)}</b>`).join("")}</div>
       <div class="lletres">${r.ops.map(o => `<button class="lletra-b opc sel" data-w="${o}">${o}</button>`).join("")}</div></div></div>`;
     api.opcions(e, o => o === r.l, r.w, {
       dirMalament: o => `${NOM_LLETRA[o] || o.toLowerCase()}. Torna-ho a provar.`,
@@ -340,9 +431,12 @@
     pinta(r, e, api) {
       let seg = 0;
       const fitxes = shuffle(r.sil.map((s, i) => ({ s, i })));
+      // amplada (en em) de les caselles i de les fitxes, per mantenir-ho tot en una línia
+      const ampSlots = r.sil.reduce((t, s) => t + Math.max(2.2, mesura(s) + 0.7), 0) + 0.25 * (r.sil.length - 1);
+      const ampFitxes = r.sil.reduce((t, s) => t + mesura(s) + 1.2, 0) + 0.35 * (r.sil.length - 1);
       e.innerHTML = `<div class="dos"><div><div class="zona"><div class="ajust">${picto(r.w, false)}</div></div></div>
-        <div><div class="slots">${r.sil.map((s, i) => `<b class="${i === 0 ? "ara" : ""}">&nbsp;</b>`).join("")}</div>
-        <div class="lletres">${fitxes.map(f => `<button class="lletra-b sil opc sel" data-i="${f.i}" data-s="${esc(f.s)}">${esc(f.s)}</button>`).join("")}</div></div></div>`;
+        <div class="col-dreta"><div class="slots" style="font-size:min(clamp(40px, 10vmin, 110px), ${(96 / ampSlots).toFixed(2)}cqw)">${r.sil.map((s, i) => `<b class="${i === 0 ? "ara" : ""}">&nbsp;</b>`).join("")}</div>
+        <div class="lletres sils" style="font-size:min(clamp(36px, 8vmin, 96px), ${(94 / ampFitxes).toFixed(2)}cqw)">${fitxes.map(f => `<button class="lletra-b sil opc sel" data-i="${f.i}" data-s="${esc(f.s)}">${esc(f.s)}</button>`).join("")}</div></div></div>`;
       const slots = e.querySelectorAll(".slots b");
       e.querySelectorAll(".opc").forEach(b => b.addEventListener("click", () => {
         if (api.ocupat()) return;
@@ -350,7 +444,12 @@
         if (s === r.sil[seg]) { // pot haver-hi síl·labes repetides (PA-TA-TA)
           slots[seg].textContent = s; slots[seg].className = "ple"; b.disabled = true; b.style.visibility = "hidden";
           seg++; if (slots[seg]) slots[seg].className = "ara";
-          if (seg === r.sil.length) api.encert(null, low(r.w)); else { so("be"); Veu.parla(low(s)); }
+          if (seg === r.sil.length) {
+            // paraula acabada: es mostra tota junta, sense caselles
+            const caixa = e.querySelector(".slots");
+            caixa.outerHTML = `<div class="paraula-feta" style="font-size:min(clamp(44px, 11vmin, 130px), ${ajusta(r.w, 88, 60).toFixed(2)}cqw)">${esc(r.w)}</div>`;
+            api.encert(null, low(r.w));
+          } else { so("be"); Veu.parla(low(s)); }
         } else api.error(b, `${low(s)}. Torna-ho a provar.`, false);
       }));
     }
@@ -379,7 +478,7 @@
         const w = b.dataset.w;
         if (r.bons.includes(w)) {
           cel[n++].innerHTML = picto(w); b.disabled = true; b.style.visibility = "hidden";
-          if (n === 4) api.encert(null, `Molt bé! Has trobat les coses ${r.g.nom === "HIVERN" || r.g.nom === "ESTIU" ? "de l'" : "de la "}${low(r.g.nom)}.`, true);
+          if (n === 4) api.encert(null, `Has trobat les coses ${r.g.nom === "HIVERN" || r.g.nom === "ESTIU" ? "de l'" : "de la "}${low(r.g.nom)}.`, true);
           else { so("be"); Veu.parla(amb(w)); }
         } else api.error(b, `${low(w)}. No és ${r.g.nom === "HIVERN" || r.g.nom === "ESTIU" ? "de l'" : "de la "}${low(r.g.nom)}. Torna-ho a provar.`, false);
       }));
@@ -399,7 +498,7 @@
       estat.caixes = estat.caixes || {};
       e.innerHTML = `<div class="zona" style="flex:.85"><div class="ajust">${picto(r.w)}</div></div>
         <div class="caixes" style="--n:${a.categories.length}">${a.categories.map(c => `<button class="caixa opc sel" style="--c:${c.color}" data-w="${c.paraula}">
-          <span class="cc"><img src="${src(V[c.paraula].id)}" alt=""><b>${esc(c.paraula)}</b></span>
+          <span class="cc"><img src="${src(V[c.paraula].id)}" alt=""><b style="font-size:min(clamp(22px, 4vmin, 48px), ${ajusta(c.paraula, 60, 40).toFixed(2)}cqw)">${esc(c.paraula)}</b></span>
           <span class="dins">${(estat.caixes[c.paraula] || []).map(w => `<img src="${src(V[w].id)}" alt="${esc(low(w))}">`).join("")}</span></button>`).join("")}</div>`;
       api.opcions(e, o => o === r.cat.paraula, null, {
         dirBe: () => `${amb(r.w)}: ${low(r.cat.paraula)}.`,
@@ -491,7 +590,7 @@
       for (let cols = 2; cols <= n; cols++) { const rows = Math.ceil(n / cols); const sz = Math.min(amp / cols, alt / rows); if (sz > millor.sz) millor = { cols, rows, sz }; }
       e.innerHTML = `<div class="zona"><div class="ajust" style="--cols:${millor.cols};--rows:${millor.rows}">${cartes.map((c, i) => {
         const m = midaLletra(c.w);
-        const cara = c.k === "p" ? picto(c.w) : `<div class="picto fz${V[c.w].t}"><div class="paraula-carta" style="--fs:${(m.fs * 1.15).toFixed(2)}"><span>${m.html}</span></div></div>`;
+        const cara = c.k === "p" ? picto(c.w) : `<div class="picto fz${V[c.w].t}"><div class="paraula-carta" style="--fs:${ajusta(c.w, 80, 18).toFixed(2)}"><span>${m.html}</span></div></div>`;
         return `<button class="carta opc sel" data-i="${i}" data-w="${esc(c.w)}"><div class="cos"><div class="dors"><span>?</span></div><div class="cara">${cara}</div></div></button>`;
       }).join("")}</div></div>`;
       let oberta = null, trobades = 0, bloc = false;
@@ -503,10 +602,10 @@
         const x = oberta; oberta = null;
         if (x.dataset.w === b.dataset.w) {
           x.classList.add("trobada"); b.classList.add("trobada"); trobades++;
-          if (trobades === r.ws.length) { api.encert(null, "Has trobat totes les parelles!", true); }
-          else { so("be"); await espera(250).catch(() => {}); Veu.parla(`${low(b.dataset.w)}. ${pick(LLOANCES)}`); }
+          if (trobades === r.ws.length) { api.encert(null, "Has trobat totes les parelles.", true); }
+          else { so("be"); }
         } else {
-          bloc = true; api.comptaError(); so("malament");
+          bloc = true; api.comptaError(x.dataset.w, b.dataset.w); so("malament");
           try { await espera(1500); } catch (err) { return; }
           x.classList.remove("girada"); b.classList.remove("girada"); x.disabled = false; b.disabled = false; bloc = false;
           Veu.parla("No són iguals. Torna-ho a provar.");
@@ -519,8 +618,23 @@
   function comenca(a) {
     const tipus = T[a.tipus];
     const rondes = tipus.rondes(a);
-    const estat = { i: 0, encertsPrimera: 0, errorsRonda: 0, ocupat: false };
+    const estat = { i: 0, encertsPrimera: 0, errorsRonda: 0, errors: 0, fallades: [], objectiu: "", ocupat: false };
     const meu = token;
+    const t0 = Date.now();
+    // registre per al seguiment del professional
+    actual = {
+      desat: false,
+      desa(acabada) {
+        this.desat = true;
+        if (!alumne || (!acabada && estat.i === 0 && estat.errors === 0)) return;
+        const total = a.tipus === "memory" ? 1 : rondes.length;
+        D.registres.push({ alumne: alumne.id, codi: a.codi, tipus: a.tipus, titol: a.titol, bloc: a.bloc, data: new Date(t0).toISOString(),
+          durada: Math.round((Date.now() - t0) / 1000), preguntes: total, fetes: acabada ? total : estat.i,
+          encertsPrimera: estat.encertsPrimera, errors: estat.errors, fallades: estat.fallades.slice(0, 40), acabada });
+        desaD();
+      }
+    };
+    const objectiuDe = r => r.w || (typeof r.r === "string" ? r.r : "") || r.intr || (r.cat && r.cat.paraula) || (r.g && r.g.nom) || (r.q ? (r.r ? "SÍ" : "NO") : "");
 
     const textEnunciat = r => (tipus.enunciat ? tipus.enunciat(r, a) : a.enunciat);
     const textDiu = r => (tipus.diu ? tipus.diu(r, a) : textEnunciat(r));
@@ -529,7 +643,7 @@
       if (meu !== token) return;
       if (estat.i >= rondes.length) return final();
       const r = rondes[estat.i];
-      estat.errorsRonda = 0; estat.ocupat = false; M.pausaFins = performance.now() + 700;
+      estat.errorsRonda = 0; estat.ocupat = false; estat.objectiu = objectiuDe(r); M.pausaFins = performance.now() + 700;
       app.innerHTML = `<section class="pantalla">
         <header class="cap">
           <button class="btn-ico gran sel" data-tornar aria-label="Tornar a ${esc(BLOCS.find(b => b.id === a.bloc).nom)}">${ICO.enrere}</button>
@@ -548,7 +662,7 @@
 
     const api = {
       ocupat: () => estat.ocupat,
-      comptaError: () => { estat.errorsRonda++; },
+      comptaError: (objectiu, triat) => { estat.errorsRonda++; estat.errors++; estat.fallades.push({ o: objectiu, t: triat }); },
       // connecta les opcions .opc: correcta(w) -> bool
       opcions(e, correcta, paraulaBe, extra = {}) {
         e.querySelectorAll(".opc").forEach(b => b.addEventListener("click", () => {
@@ -563,22 +677,22 @@
           }
         }));
       },
-      async encert(b, dir, complet) {
+      // encert: so + casella verda + la paraula (la felicitació es reserva per al final)
+      async encert(b, dir) {
         estat.ocupat = true;
         if (estat.errorsRonda === 0) estat.encertsPrimera++;
-        const ll = pick(LLOANCES);
-        so("be"); mostraReforc(ll);
+        so("be");
         e_bloqueja();
-        const frase = complet ? dir : (dir ? `${dir}. ${ll}` : ll);
-        const t0 = performance.now();
-        await Veu.parla(frase.replace(/\.\./g, "."));
-        const resta = 1300 - (performance.now() - t0);
+        const ti = performance.now();
+        if (dir) await Veu.parla(dir.replace(/\.\./g, "."));
+        const resta = 1000 - (performance.now() - ti);
         try { if (resta > 0) await espera(resta); else await espera(150); } catch (err) { return; }
         if (meu !== token) return;
         estat.i++; ronda();
       },
       error(b, dir, marca) {
-        estat.errorsRonda++;
+        estat.errorsRonda++; estat.errors++;
+        if (b) estat.fallades.push({ o: estat.objectiu, t: b.dataset.w || b.dataset.s || "" });
         so("malament");
         if (b) { b.classList.remove("malament"); void b.offsetWidth; b.classList.add("malament");
           if (marca) { b.classList.add("provat"); b.disabled = true; } }
@@ -588,6 +702,7 @@
     function e_bloqueja() { app.querySelectorAll(".escenari .opc").forEach(x => { x.disabled = true; }); }
 
     function final() {
+      actual.desa(true);
       const total = a.tipus === "memory" ? 1 : rondes.length;
       const pct = total ? estat.encertsPrimera / total : 1;
       const est = a.tipus === "memory" ? 3 : pct >= .85 ? 3 : pct >= .5 ? 2 : 1;
@@ -600,10 +715,12 @@
           <button class="btn-txt sel" data-b>${ICO.enrere} Altres activitats</button>
           <button class="btn-txt sel" data-i>${ICO.casa} Inici</button>
         </div></div></section>`;
-      app.querySelector("[data-r]").addEventListener("click", () => { token++; comenca(a); });
+      app.querySelector("[data-r]").addEventListener("click", () => { token++; document.querySelectorAll(".reforc").forEach(x => x.remove()); comenca(a); });
       app.querySelector("[data-b]").addEventListener("click", () => vesA("bloc-" + a.bloc));
       app.querySelector("[data-i]").addEventListener("click", () => vesA("inici"));
-      Veu.parla("Has acabat l'activitat. Molt bona feina!");
+      const ll = pick(LLOANCES);
+      mostraReforc(ll);
+      Veu.parla(`${ll} Has acabat l'activitat, ${alumne ? alumne.nom : ""}.`);
     }
     ronda();
   }
@@ -615,8 +732,7 @@
     const fmt = n => n.toFixed(1).replace(".", ",");
     const seg = (clau, ops) => `<div class="seg">${ops.map(([v, t]) => `<button class="sel ${C[clau] === v ? "on" : ""}" data-set="${clau}" data-v='${JSON.stringify(v)}'>${t}</button>`).join("")}</div>`;
     app.innerHTML = `<section class="pantalla scroll">
-      <header class="cap"><button class="btn-ico gran sel" data-go aria-label="Inici">${ICO.casa}</button>
-        <div class="titol"><h2>Configuració</h2><span class="sub">Es desa en aquest navegador</span></div></header>
+      ${capProf("configuracio")}
       <div class="config">
         <section class="seccio"><h3>Accés amb la mirada</h3>
           <div class="opcio"><span class="lbl">Punt i cercle de rellotge</span>${seg("mirada", [[true, "Activat"], [false, "Desactivat"]])}</div>
@@ -644,10 +760,15 @@
         <section class="seccio"><h3>Activitats</h3>
           <div class="opcio"><span class="lbl">Preguntes per activitat</span>${seg("rondes", [[5, "5"], [8, "8"], [10, "10"], [12, "12"]])}</div>
           <div class="opcio"><span class="lbl">So de reforç</span>${seg("so", [[true, "Sí"], [false, "No"]])}</div>
-          <p class="nota">Quan l'alumne encerta: so, missatge i veu de reforç positiu. Quan s'equivoca: la veu diu el pictograma o la paraula triada i «Torna-ho a provar».</p>
+          <p class="nota">Quan l'alumne encerta: so curt, la casella es posa verda i la veu diu la paraula. La felicitació surt en acabar l'activitat. Quan s'equivoca: la veu diu el pictograma o la paraula triada i «Torna-ho a provar».</p>
+        </section>
+        <section class="seccio"><h3>Codi PIN</h3>
+          <p class="nota">El PIN protegeix el seguiment, els alumnes i la configuració.</p>
+          <div class="opcio"><button class="btn-txt sel" data-canvia-pin>Canvia el PIN</button></div>
         </section>
       </div></section>`;
-    on("[data-go]", () => vesA("inici"));
+    connectaProf();
+    on("[data-canvia-pin]", () => { D.pin = null; desaD(); profOk = false; vesA("configuracio"); });
     on("[data-set]", e => { const b = e.currentTarget; C[b.dataset.set] = JSON.parse(b.dataset.v); desa(); aplicaMirada();
       if (b.dataset.set === "onaModel") Veu.cache.clear();
       pintaConfig(); if (b.dataset.set === "motor" && C.motor === "ona" && !Veu.onaLlesta) Veu.parla("Primer has de descarregar la veu Ona."); });
@@ -683,6 +804,196 @@
     e2.textContent = ok ? "Instal·lada en aquest navegador ✓" : "No instal·lada";
   }
 
+  /* ================================================================
+     ZONA DEL PROFESSIONAL (protegida amb PIN)
+     ================================================================ */
+  function capProf(actiu) {
+    const pest = [["seguiment", "Seguiment"], ["gestio-alumnes", "Alumnes"], ["configuracio", "Configuració"]];
+    return `<header class="cap">
+      <button class="btn-ico gran sel" data-surt aria-label="Surt de la zona del professional">${ICO.casa}</button>
+      <div class="titol"><h2>Zona del professional</h2><span class="sub">Les dades es guarden només en aquest navegador</span></div>
+    </header>
+    <nav class="pestanyes">${pest.map(([h, t]) => `<button class="sel ${h === actiu ? "on" : ""}" data-pest="${h}">${t}</button>`).join("")}</nav>`;
+  }
+  function connectaProf() {
+    on("[data-surt]", () => { profOk = false; vesA(alumne ? "inici" : "entrar"); });
+    on("[data-pest]", e => vesA(e.currentTarget.dataset.pest));
+  }
+
+  function pintaPin(desti) {
+    const crea = !D.pin;
+    let codi = "", primer = null;
+    const pinta = (msg, error) => {
+      app.innerHTML = `<section class="pantalla scroll">
+        <header class="cap"><button class="btn-ico gran sel" data-surt aria-label="Tornar">${ICO.enrere}</button>
+          <div class="titol"><h2>Zona del professional</h2><span class="sub">${crea ? "Primer cal crear un codi PIN" : "Escriu el codi PIN"}</span></div></header>
+        <div class="pin">
+          <p class="pin-msg ${error ? "ko" : ""}" role="status">${esc(msg)}</p>
+          <div class="pin-punts">${[0, 1, 2, 3].map(i => `<i class="${i < codi.length ? "ple" : ""}"></i>`).join("")}</div>
+          <div class="teclat">${[1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => `<button class="sel" data-n="${n}">${n}</button>`).join("")}
+            <button class="sel" data-esb aria-label="Esborra">⌫</button><button class="sel" data-n="0">0</button><span></span></div>
+          ${crea ? "" : `<button class="enllac sel" data-oblit>He oblidat el PIN</button>`}
+        </div></section>`;
+      on("[data-surt]", () => vesA(alumne ? "inici" : "entrar"));
+      on("[data-n]", e => tecla(e.currentTarget.dataset.n));
+      on("[data-esb]", () => { codi = codi.slice(0, -1); pinta(msgActual); });
+      on("[data-oblit]", oblit);
+    };
+    let msgActual = crea ? "Tria un PIN de 4 xifres." : "Escriu el PIN de 4 xifres.";
+    const tecla = n => {
+      if (codi.length >= 4) return;
+      codi += n;
+      if (codi.length < 4) return pinta(msgActual);
+      if (crea && primer === null) { primer = codi; codi = ""; msgActual = "Torna a escriure el PIN per confirmar-lo."; return pinta(msgActual); }
+      if (crea) {
+        if (codi !== primer) { primer = null; codi = ""; msgActual = "Tria un PIN de 4 xifres."; return pinta("Els dos PIN no coincideixen. Torna-ho a provar.", true); }
+        D.pin = codi; desaD(); profOk = true; return vesA(desti);
+      }
+      if (codi === D.pin) { profOk = true; return vesA(desti); }
+      codi = ""; pinta("PIN incorrecte. Torna-ho a provar.", true);
+    };
+    const oblit = () => {
+      app.querySelector(".pin").innerHTML = `<div class="confirma">
+        <p><b>Per seguretat, el PIN només es pot recuperar esborrant totes les dades de seguiment</b> (els alumnes i el seu historial). La configuració es manté.</p>
+        <div class="accions-form"><button class="btn-txt sel ko" data-si>${ICO.esborra} Esborra les dades i crea un PIN nou</button>
+        <button class="btn-txt sel" data-no>No, torna enrere</button></div></div>`;
+      on("[data-no]", () => pinta(msgActual));
+      on("[data-si]", () => { D.alumnes = []; D.registres = []; D.pin = null; desaD(); entra(null); pintaPin(desti); });
+    };
+    document.onkeydown = e => {
+      if (!document.querySelector(".teclat")) { document.onkeydown = null; return; }
+      if (/^[0-9]$/.test(e.key)) tecla(e.key);
+      else if (e.key === "Backspace") { codi = codi.slice(0, -1); pinta(msgActual); }
+    };
+    pinta(msgActual);
+  }
+
+  // --- càlculs de seguiment ---
+  const fmtData = iso => new Date(iso).toLocaleDateString("ca-ES", { day: "2-digit", month: "2-digit", year: "numeric" });
+  const fmtHora = iso => new Date(iso).toLocaleTimeString("ca-ES", { hour: "2-digit", minute: "2-digit" });
+  const fmtTemps = s => s < 60 ? `${s} s` : s < 3600 ? `${Math.floor(s / 60)} min ${String(s % 60).padStart(2, "0")} s` : `${Math.floor(s / 3600)} h ${Math.floor(s % 3600 / 60)} min`;
+  const pct = (a, b) => b ? Math.round(a * 100 / b) : 0;
+  const nomAlumne = id => (D.alumnes.find(x => x.id === id) || { nom: "(esborrat)" }).nom;
+  let filtreAl = null;
+
+  function pintaSeguiment() {
+    if (filtreAl && !D.alumnes.some(x => x.id === filtreAl)) filtreAl = null;
+    if (!filtreAl && D.alumnes.length) filtreAl = D.alumnes.slice().sort((a, b) => a.nom.localeCompare(b.nom, "ca"))[0].id;
+    const regs = D.registres.filter(r => r.alumne === filtreAl).sort((a, b) => b.data.localeCompare(a.data));
+    const acab = regs.filter(r => r.acabada);
+    const totP = acab.reduce((t, r) => t + (r.tipus === "memory" ? 0 : r.preguntes), 0);
+    const totE = acab.reduce((t, r) => t + (r.tipus === "memory" ? 0 : r.encertsPrimera), 0);
+    const temps = regs.reduce((t, r) => t + r.durada, 0);
+    // per activitat
+    const perAct = {};
+    regs.slice().reverse().forEach(r => {
+      const x = perAct[r.codi] = perAct[r.codi] || { codi: r.codi, titol: r.titol, vegades: 0, acabades: 0, ultim: null, millor: -1, data: r.data };
+      x.vegades++; x.data = r.data;
+      if (r.acabada) { x.acabades++; const p = pct(r.encertsPrimera, r.preguntes); x.ultim = p; x.millor = Math.max(x.millor, p); }
+    });
+    // paraules amb més errors
+    const err = {};
+    regs.forEach(r => (r.fallades || []).forEach(f => { if (!f.o) return; const k = f.o; err[k] = err[k] || { n: 0, amb: {} }; err[k].n++; if (f.t) err[k].amb[f.t] = (err[k].amb[f.t] || 0) + 1; }));
+    const topErr = Object.entries(err).sort((a, b) => b[1].n - a[1].n).slice(0, 12);
+    const llista = D.alumnes.slice().sort((a, b) => a.nom.localeCompare(b.nom, "ca"));
+
+    app.innerHTML = `<section class="pantalla scroll">
+      ${capProf("seguiment")}
+      ${!llista.length ? `<p class="nota-buida">Encara no hi ha alumnes. Es creen a la pantalla d'entrada amb «Alumne nou».</p>` : `
+      <div class="filtre">${llista.map(a => `<button class="sel ${a.id === filtreAl ? "on" : ""}" data-al="${a.id}">${avatar(a.nom)}${esc(a.nom)}</button>`).join("")}</div>
+      <div class="resum">
+        <div><span>Activitats fetes</span><b>${regs.length}</b></div>
+        <div><span>Acabades</span><b>${acab.length}</b></div>
+        <div><span>Encerts a la primera</span><b>${totP ? pct(totE, totP) + " %" : "—"}</b></div>
+        <div><span>Temps total</span><b>${fmtTemps(temps)}</b></div>
+        <div><span>Última vegada</span><b>${regs[0] ? fmtData(regs[0].data) : "—"}</b></div>
+      </div>
+      <div class="accions-form"><button class="btn-txt sel" data-csv="un">${ICO.baixa} Descarrega l'Excel d'aquest alumne</button>
+        <button class="btn-txt sel" data-csv="tots">${ICO.baixa} Descarrega l'Excel de tots</button></div>
+      <div class="dues-col">
+        <section class="seccio"><h3>Per activitat</h3>
+          ${Object.keys(perAct).length ? `<div class="taula-wrap"><table class="taula"><thead><tr><th>Codi</th><th>Activitat</th><th class="n">Vegades</th><th class="n">Últim</th><th class="n">Millor</th></tr></thead><tbody>
+          ${Object.values(perAct).sort((a, b) => a.codi.localeCompare(b.codi)).map(x => `<tr><td><span class="codi">${x.codi}</span></td><td>${esc(x.titol)}</td><td class="n">${x.vegades}</td>
+            <td class="n">${x.ultim === null ? "—" : barra(x.ultim)}</td><td class="n">${x.millor < 0 ? "—" : x.millor + " %"}</td></tr>`).join("")}
+          </tbody></table></div><p class="nota">«Últim» i «Millor»: percentatge d'encerts a la primera en les activitats acabades.</p>` : `<p class="nota">Encara no ha fet cap activitat.</p>`}
+        </section>
+        <section class="seccio"><h3>Paraules amb més errors</h3>
+          ${topErr.length ? `<div class="taula-wrap"><table class="taula"><thead><tr><th>Paraula</th><th class="n">Errors</th><th>Ha triat</th></tr></thead><tbody>
+          ${topErr.map(([w, x]) => `<tr><td><span class="pw">${V[w] ? `<img src="${src(V[w].id)}" alt="">` : ""}${esc(w)}</span></td><td class="n">${x.n}</td>
+            <td>${Object.entries(x.amb).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([t, n]) => esc(t) + (n > 1 ? ` (${n})` : "")).join(", ")}</td></tr>`).join("")}
+          </tbody></table></div>` : `<p class="nota">Cap error registrat.</p>`}
+        </section>
+      </div>
+      <section class="seccio"><h3>Historial</h3>
+        ${regs.length ? `<div class="taula-wrap"><table class="taula"><thead><tr><th>Data</th><th>Hora</th><th>Codi</th><th>Activitat</th><th class="n">Encerts a la 1a</th><th class="n">Errors</th><th class="n">Temps</th><th>Estat</th></tr></thead><tbody>
+        ${regs.map(r => `<tr><td>${fmtData(r.data)}</td><td>${fmtHora(r.data)}</td><td><span class="codi">${r.codi}</span></td><td>${esc(r.titol)}</td>
+          <td class="n">${r.tipus === "memory" ? "—" : `${r.encertsPrimera} de ${r.acabada ? r.preguntes : r.fetes}`}</td><td class="n">${r.errors}</td><td class="n">${fmtTemps(r.durada)}</td>
+          <td>${r.acabada ? `<span class="xip ok">Acabada</span>` : `<span class="xip">Deixada (${r.fetes}/${r.preguntes})</span>`}</td></tr>`).join("")}
+        </tbody></table></div>` : `<p class="nota">Encara no hi ha cap registre.</p>`}
+      </section>`}
+    </section>`;
+    connectaProf();
+    on("[data-al]", e => { filtreAl = e.currentTarget.dataset.al; pintaSeguiment(); });
+    on("[data-csv]", e => baixaCSV(e.currentTarget.dataset.csv === "un" ? filtreAl : null));
+  }
+  const barra = p => `<span class="minibarra"><i style="width:${p}%"></i></span>${p} %`;
+
+  function baixaCSV(id) {
+    const regs = D.registres.filter(r => !id || r.alumne === id).sort((a, b) => a.data.localeCompare(b.data));
+    const cols = ["Alumne", "Data", "Hora", "Codi", "Activitat", "Bloc", "Preguntes", "Fetes", "Encerts a la primera", "% encerts", "Errors", "Temps (s)", "Estat", "Errors (paraula > triada)"];
+    const q = v => { const s = String(v ?? ""); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
+    const files = regs.map(r => [nomAlumne(r.alumne), fmtData(r.data), fmtHora(r.data), r.codi, r.titol, (BLOCS.find(b => b.id === r.bloc) || {}).nom || r.bloc,
+      r.preguntes, r.fetes, r.encertsPrimera, r.acabada ? pct(r.encertsPrimera, r.preguntes) : "", r.errors, r.durada, r.acabada ? "Acabada" : "Deixada",
+      (r.fallades || []).map(f => `${f.o} > ${f.t}`).join(", ")].map(q).join(";"));
+    const csv = "﻿" + [cols.join(";"), ...files].join("\r\n");
+    const nom = id ? nomAlumne(id).replace(/[^\p{L}\p{N}]+/gu, "_") : "tots";
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+    a.download = `seguiment_${nom}_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+  }
+
+  function pintaGestio() {
+    const llista = D.alumnes.slice().sort((a, b) => a.nom.localeCompare(b.nom, "ca"));
+    app.innerHTML = `<section class="pantalla scroll">
+      ${capProf("gestio-alumnes")}
+      <section class="seccio"><h3>Alumnes (${llista.length})</h3>
+        ${llista.length ? `<div class="taula-wrap"><table class="taula"><thead><tr><th>Nom</th><th>Creat</th><th class="n">Activitats</th><th></th></tr></thead><tbody>
+        ${llista.map(a => `<tr data-fila="${a.id}"><td><span class="pw">${avatar(a.nom)}${esc(a.nom)}</span></td><td>${fmtData(a.creat)}</td>
+          <td class="n">${D.registres.filter(r => r.alumne === a.id).length}</td>
+          <td class="accions-fila"><button class="btn-txt sel" data-renom="${a.id}">Canvia el nom</button><button class="btn-txt sel ko" data-esb="${a.id}">${ICO.esborra} Esborra</button></td></tr>`).join("")}
+        </tbody></table></div>` : `<p class="nota">Encara no hi ha alumnes. Es creen a la pantalla d'entrada amb «Alumne nou».</p>`}
+        <div id="gestio-panell"></div>
+      </section>
+    </section>`;
+    connectaProf();
+    const panell = document.getElementById("gestio-panell");
+    on("[data-renom]", e => {
+      const al = D.alumnes.find(x => x.id === e.currentTarget.dataset.renom);
+      panell.innerHTML = `<form class="form-nom" id="form-renom"><label for="renom">Nou nom per a ${esc(al.nom)}</label>
+        <input id="renom" maxlength="30" value="${esc(al.nom)}"><p class="avis" id="avis-renom" role="alert" hidden></p>
+        <div class="accions-form"><button type="submit" class="btn-txt prim sel">Desa</button><button type="button" class="btn-txt sel" data-cancel>Cancel·la</button></div></form>`;
+      document.getElementById("renom").focus();
+      on("[data-cancel]", () => { panell.innerHTML = ""; }, panell);
+      document.getElementById("form-renom").addEventListener("submit", ev => {
+        ev.preventDefault();
+        const nom = document.getElementById("renom").value.trim().replace(/\s+/g, " "), avis = document.getElementById("avis-renom");
+        if (!nom) { avis.textContent = "Escriu un nom."; avis.hidden = false; return; }
+        if (D.alumnes.some(x => x !== al && norm(x.nom) === norm(nom))) { avis.textContent = `Ja hi ha un alumne que es diu «${nom}».`; avis.hidden = false; return; }
+        al.nom = nom; desaD(); pintaGestio();
+      });
+    });
+    on("[data-esb]", e => {
+      const al = D.alumnes.find(x => x.id === e.currentTarget.dataset.esb);
+      const n = D.registres.filter(r => r.alumne === al.id).length;
+      panell.innerHTML = `<div class="confirma"><p>Segur que vols esborrar <b>${esc(al.nom)}</b> i els seus ${n} registres? No es pot desfer.</p>
+        <div class="accions-form"><button class="btn-txt sel ko" data-si>${ICO.esborra} Sí, esborra</button><button class="btn-txt sel" data-no>No</button></div></div>`;
+      on("[data-no]", () => { panell.innerHTML = ""; }, panell);
+      on("[data-si]", () => { D.alumnes = D.alumnes.filter(x => x !== al); D.registres = D.registres.filter(r => r.alumne !== al.id);
+        if (alumne && alumne.id === al.id) entra(null); desaD(); pintaGestio(); }, panell);
+    });
+  }
+
   /* ---------------- vocabulari ---------------- */
   function pintaVocab() {
     const temes = [["L'hort", w => V[w].tags.includes("hort")], ["Fruites", w => V[w].tags.includes("fruita") && !V[w].tags.includes("hort")],
@@ -699,14 +1010,11 @@
 
   /* ---------------- inici ---------------- */
   aplicaMirada();
-  const portada = document.getElementById("inici-so");
-  const arrenca = () => {
-    portada.remove();
+  // el primer toc real (triar l'alumne) desbloqueja el so del navegador
+  document.addEventListener("pointerdown", () => {
     try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) {}
-    Veu.parla("Coneixement de l'entorn natural");
-  };
-  portada.addEventListener("click", arrenca);
-  document.addEventListener("keydown", e => { if (document.getElementById("inici-so") && (e.key === "Enter" || e.key === " ")) arrenca(); });
+  }, { once: true });
+  if (!alumne && location.hash && !["#nou-alumne", "#seguiment", "#gestio-alumnes", "#configuracio"].includes(location.hash)) history.replaceState(null, "", "#entrar");
   ruta();
   Veu.comprovaOna().then(ok => { if (ok) Veu.preescalfa([...LLOANCES, "Torna-ho a provar."]); });
 })();
