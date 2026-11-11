@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entorn Natural</title>
+<meta name="description" content="Activitats digitals de coneixement de l'entorn natural amb pictogrames ARASAAC. Accés tàctil i amb la mirada.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<link rel="stylesheet" href="css/estil.css">
+<script type="importmap">
+{ "imports": { "onnxruntime-web": "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.18.0/dist/esm/ort.min.js" } }
+</script>
+</head>
+<body>
+<main id="app"></main>
+<div id="punter" aria-hidden="true"></div>
+<div id="inici-so" role="button" tabindex="0" aria-label="Comença">
+  <div>
+    <h1>Coneixement de l'entorn natural</h1>
+    <p>Toca la pantalla o fes clic per començar.</p>
+    <span class="gran">Comença</span>
+  </div>
+</div>
+<script src="js/vocabulari.js"></script>
+<script src="js/activitats.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
