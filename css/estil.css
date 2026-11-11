@@ -454,3 +454,5 @@ html.mirada #punter.actiu { display: block; }
 .alumne.nou { color: var(--accent); }
 .alumne.nou .avatar.mes { border-width: 3px; }
 .top .eines { align-items: center; }
+.peu-entrada { margin-top: auto; padding-top: 16px; }
+.peu b { font-weight: 600; }

@@ -54,5 +54,8 @@ Cada activitat indica si ve d'una **fitxa original** (PDF en paper) o és una **
 
 ## Crèdits
 
+App creada per **Miquel Gatell** amb l'ajuda de Claude (Anthropic): el disseny didàctic, les fitxes originals i les
+decisions són seves; Claude ha programat l'aplicació i ha ampliat les activitats i el vocabulari.
+
 Pictogrames: Sergio Palao. Origen: ARASAAC (https://arasaac.org). Llicència: CC BY-NC-SA. Propietari: Govern d'Aragó.
 Veu Ona: projecte FestCat (UPC), model Piper.

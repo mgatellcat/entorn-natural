@@ -245,6 +245,8 @@
   }
   function on(sel, fn, arrel = app) { arrel.querySelectorAll(sel).forEach(el => el.addEventListener("click", fn)); }
 
+  const CREDITS = `Creat per <b>Miquel Gatell</b> amb Claude (Anthropic) · Pictogrames: Sergio Palao · ARASAAC (arasaac.org) · CC BY-NC-SA · Govern d'Aragó`;
+
   /* ---------------- portada ---------------- */
   const fetesDe = (bloc) => new Set(D.registres.filter(r => alumne && r.alumne === alumne.id && r.acabada && r.bloc === bloc).map(r => r.codi));
   function pintaPortada() {
@@ -268,12 +270,12 @@
           <span class="bloc-txt">
             <span class="nom">${esc(b.nom)}</span>
             <span class="desc">${esc(b.desc)}</span>
-            <span class="prog"><span class="barra-b"><i style="width:${n ? fetes * 100 / n : 0}%"></i></span><span>${fetes} de ${n} fetes</span></span>
+            <span class="prog"><span class="barra-b"><i style="width:${n ? fetes * 100 / n : 0}%"></i></span><span>${fetes} de ${n} ${n === 1 ? "feta" : "fetes"}</span></span>
           </span>
           <span class="icones ${b.icones.length > 1 ? "dues" : ""}">${b.icones.map(i => `<img src="${src(ICONES[i])}" alt="">`).join("")}</span>
         </button>`;
       }).join("")}</nav>
-      <div class="peu">Pictogrames: Sergio Palao · ARASAAC (arasaac.org) · CC BY-NC-SA · Govern d'Aragó</div>
+      <div class="peu">${CREDITS}</div>
     </section>`;
     on("[data-go]", e => { const g = e.currentTarget.dataset.go; const b = BLOCS.find(x => "bloc-" + x.id === g); if (b) Veu.parla(b.nom); vesA(g); });
     on("[data-canvia]", () => { entra(null); vesA("entrar"); });
@@ -304,6 +306,7 @@
         <button class="alumne nou sel" data-nou><span class="avatar mes">+</span><span>Alumne nou</span></button>
       </div>
       ${llista.length ? "" : `<p class="nota-buida">Encara no hi ha cap alumne. Toca «Alumne nou» per crear-ne un.</p>`}
+      <div class="peu peu-entrada">${CREDITS}</div>
     </section>`;
     connectaMirada(pintaEntrada);
     on("[data-go]", () => vesA("seguiment"));
@@ -369,7 +372,7 @@
       <header class="cap">
         <button class="btn-ico gran sel" data-go="inici" aria-label="Inici">${ICO.casa}</button>
         <span class="xapa ${b.color}"><img src="${src(ICONES[b.icones[0]])}" alt=""></span>
-        <div class="titol"><h2>${esc(b.nom)}</h2><span class="sub">${fetes.size} de ${llista.length} activitats fetes · ${esc(alumne.nom)}</span></div>
+        <div class="titol"><h2>${esc(b.nom)}</h2><span class="sub">${fetes.size} de ${llista.length} ${llista.length === 1 ? "activitat feta" : "activitats fetes"} · ${esc(alumne.nom)}</span></div>
         ${pags > 1 ? `<div class="pagina"><button class="btn-ico sel" data-pag="${pag - 1}" ${pag === 0 ? "disabled" : ""} aria-label="Anterior">${ICO.enrere}</button>
           <span>${pag + 1} / ${pags}</span><button class="btn-ico sel" data-pag="${pag + 1}" ${pag === pags - 1 ? "disabled" : ""} aria-label="Següent">${ICO.endavant}</button></div>` : ""}
       </header>

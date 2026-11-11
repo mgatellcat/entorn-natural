@@ -25,7 +25,7 @@ window.BLOCS = [
   { id: "jo", nom: "Jocs educatius", icones: ["jugar"], color: "jo",
     desc: "Memory, troba l'intrús i parelles" },
   { id: "es", nom: "Escolta i comprensió", icones: ["escoltar"], color: "es",
-    desc: "Escoltar, respondre sí o no i endevinalles" }
+    desc: "Escoltar i endevinar: endevinalles de la natura" }
 ];
 
 window.TIPUS = {
@@ -132,12 +132,6 @@ window.ACTIVITATS = [
       { p: "CISTELLA", r: "COLLIR" }, { p: "PLANTA", r: "PLANTAR" }, { p: "PALA", r: "CAVAR" },
       { p: "AIGUA", r: "REGAR" }, { p: "MADUIXA", r: "COLLIR" }],
     pregunta: "Què fas amb {art} {p}?" },
-  { codi: "CO-10", bloc: "co", titol: "Quin temps fa?", tipus: "relaciona", tema: "estacions", nivell: 2,
-    origen: "ampliacio", opcions: 4, opcionsLlista: ["NEVAT", "ASSOLELLAT", "VENTÓS", "PLUJÓS"],
-    parelles: [
-      { p: "HIVERN", r: "NEVAT" }, { p: "ESTIU", r: "ASSOLELLAT" },
-      { p: "TARDOR", r: "VENTÓS" }, { p: "PRIMAVERA", r: "PLUJÓS" }],
-    pregunta: "Quin temps fa sovint {a} {p}?" },
 
   /* ================= JOCS EDUCATIUS ================= */
   { codi: "JO-01", mini: ["MADUIXA", "REGADORA"], bloc: "jo", titol: "Memory de l'hort", tipus: "memory", tema: "hort", nivell: 1,
@@ -171,42 +165,6 @@ window.ACTIVITATS = [
       { tag: "roba-calor", frase: "Quin no és per a la calor?" }] },
 
   /* ================= ESCOLTA I COMPRENSIÓ ================= */
-  { codi: "ES-01", mini: ["COGOMBRE", "CARXOFA"], bloc: "es", titol: "Escolta i tria: l'hort", tipus: "escolta", tema: "hort", nivell: 1,
-    origen: "ampliacio", paraules: HORT_AMPLI, opcions: 4 },
-  { codi: "ES-02", mini: ["ESQUIROL", "PISCINA"], bloc: "es", titol: "Escolta i tria: les estacions", tipus: "escolta", tema: "estacions", nivell: 1,
-    origen: "ampliacio", paraules: ESTACIONS_AMPLI, opcions: 4 },
-  { codi: "ES-03", bloc: "es", titol: "Sí o no? Les estacions", tipus: "sino", tema: "estacions", nivell: 1,
-    origen: "ampliacio",
-    preguntes: [
-      { q: "A l'hivern fa fred?", p: ["HIVERN", "FRED"], r: true },
-      { q: "A l'estiu anem a la platja?", p: ["ESTIU", "PLATJA"], r: true },
-      { q: "A l'hivern ens posem el banyador?", p: ["HIVERN", "BANYADOR"], r: false },
-      { q: "A la tardor cauen les fulles?", p: ["TARDOR", "FULLA SECA"], r: true },
-      { q: "A la primavera surten les flors?", p: ["PRIMAVERA", "FLORS"], r: true },
-      { q: "A l'estiu fem un ninot de neu?", p: ["ESTIU", "NINOT DE NEU"], r: false },
-      { q: "A la tardor mengem castanyes?", p: ["TARDOR", "CASTANYES"], r: true },
-      { q: "A l'estiu ens posem la bufanda?", p: ["ESTIU", "BUFANDA"], r: false },
-      { q: "A la primavera veiem papallones?", p: ["PRIMAVERA", "PAPALLONA"], r: true },
-      { q: "A l'hivern fa molta calor?", p: ["HIVERN", "CALOR"], r: false },
-      { q: "A l'estiu mengem gelats?", p: ["ESTIU", "GELAT"], r: true },
-      { q: "A la primavera mengem panellets?", p: ["PRIMAVERA", "PANELLETS"], r: false },
-      { q: "Quan plou, obrim el paraigua?", p: ["PLUJA", "PARAIGUA"], r: true },
-      { q: "A l'estiu ens posem els guants?", p: ["ESTIU", "GUANTS"], r: false }] },
-  { codi: "ES-04", bloc: "es", titol: "Sí o no? L'hort", tipus: "sino", tema: "hort", nivell: 1,
-    origen: "ampliacio",
-    preguntes: [
-      { q: "La pastanaga és una verdura?", p: ["PASTANAGA", "VERDURA"], r: true },
-      { q: "La maduixa és una fruita?", p: ["MADUIXA", "FRUITA"], r: true },
-      { q: "Amb la regadora reguem les plantes?", p: ["REGADORA", "REGAR"], r: true },
-      { q: "Amb la cistella cavem la terra?", p: ["CISTELLA", "CAVAR"], r: false },
-      { q: "L'enciam és una eina?", p: ["ENCIAM", "EINES"], r: false },
-      { q: "Les plantes necessiten aigua?", p: ["PLANTA", "AIGUA"], r: true },
-      { q: "La ceba creix a dins de la terra?", p: ["CEBA", "TERRA"], r: true },
-      { q: "El tomàquet és una eina?", p: ["TOMÀQUET", "EINES"], r: false },
-      { q: "Sembrem les llavors a la terra?", p: ["LLAVOR", "SEMBRAR"], r: true },
-      { q: "L'all és una fruita?", p: ["ALL", "FRUITA"], r: false },
-      { q: "Amb l'aixada cavem la terra?", p: ["AIXADA", "CAVAR"], r: true },
-      { q: "Les flors necessiten sol?", p: ["FLOR", "SOL"], r: true }] },
   { codi: "ES-05", bloc: "es", titol: "Endevinalles de la natura", tipus: "endevinalla", tema: "hort i estacions", nivell: 2,
     origen: "ampliacio",
     endevinalles: [
