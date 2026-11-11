@@ -60,6 +60,7 @@
     altaveu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16.5 8.5a5 5 0 010 7"/><path d="M19 6a8.5 8.5 0 010 12"/></svg>',
     config: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg>',
     llibre: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2V5z"/><path d="M4 19a2 2 0 012-2h13"/></svg>',
+    fulla: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"/><path d="M5 19l8-8"/></svg>',
     persona: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>',
     ull: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',
     baixa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></svg>',
@@ -245,23 +246,32 @@
   function on(sel, fn, arrel = app) { arrel.querySelectorAll(sel).forEach(el => el.addEventListener("click", fn)); }
 
   /* ---------------- portada ---------------- */
+  const fetesDe = (bloc) => new Set(D.registres.filter(r => alumne && r.alumne === alumne.id && r.acabada && r.bloc === bloc).map(r => r.codi));
   function pintaPortada() {
-    app.innerHTML = `<section class="pantalla">
-      <header class="portada-cap">
-        <div class="titol"><div class="eyebrow">Aula de grans · CEE</div><h1>Coneixement de l'entorn natural</h1></div>
+    app.innerHTML = `<section class="pantalla portada">
+      <header class="top">
+        <div class="marca">${ICO.fulla}<span>Coneixement de l'entorn natural</span></div>
         <div class="eines">
-          <span class="qui">${avatar(alumne.nom)}<b>${esc(alumne.nom)}</b></span>
-          <button class="btn-txt sel" data-canvia>${ICO.persona} Canvia d'alumne</button>
           <button class="btn-ico sel" data-go="vocabulari" aria-label="Vocabulari">${ICO.llibre}</button>
           <button class="btn-ico sel" data-go="seguiment" aria-label="Zona del professional">${ICO.config}</button>
         </div>
       </header>
+      <div class="hola">
+        ${avatar(alumne.nom)}
+        <div class="hola-txt"><h1>Hola, ${esc(alumne.nom)}!</h1><p>Què vols fer avui?</p></div>
+        <button class="btn-txt sel" data-canvia>${ICO.persona} Canvia d'alumne</button>
+      </div>
       <nav class="blocs">${BLOCS.map(b => {
-        const n = ACTS.filter(a => a.bloc === b.id).length;
+        const acts = ACTS.filter(a => a.bloc === b.id), n = acts.length;
+        const fetes = acts.filter(a => fetesDe(b.id).has(a.codi)).length;
         return `<button class="bloc sel ${b.color}" data-go="bloc-${b.id}">
+          <span class="bloc-txt">
+            <span class="nom">${esc(b.nom)}</span>
+            <span class="desc">${esc(b.desc)}</span>
+            <span class="prog"><span class="barra-b"><i style="width:${n ? fetes * 100 / n : 0}%"></i></span><span>${fetes} de ${n} fetes</span></span>
+          </span>
           <span class="icones ${b.icones.length > 1 ? "dues" : ""}">${b.icones.map(i => `<img src="${src(ICONES[i])}" alt="">`).join("")}</span>
-          <span><span class="nom">${esc(b.nom)}</span><span class="desc">${esc(b.desc)}</span>
-          <span class="num">${n} activitats</span></span></button>`;
+        </button>`;
       }).join("")}</nav>
       <div class="peu">Pictogrames: Sergio Palao · ARASAAC (arasaac.org) · CC BY-NC-SA · Govern d'Aragó</div>
     </section>`;
@@ -282,13 +292,13 @@
   }
   function pintaEntrada() {
     const llista = D.alumnes.slice().sort((a, b) => a.nom.localeCompare(b.nom, "ca"));
-    app.innerHTML = `<section class="pantalla scroll">
-      <header class="portada-cap">
-        <div class="titol"><div class="eyebrow">Aula de grans · CEE</div><h1>Coneixement de l'entorn natural</h1></div>
+    app.innerHTML = `<section class="pantalla scroll portada">
+      <header class="top">
+        <div class="marca">${ICO.fulla}<span>Coneixement de l'entorn natural</span></div>
         <div class="eines">${botoMirada()}
           <button class="btn-ico sel" data-go="seguiment" aria-label="Zona del professional">${ICO.config}</button></div>
       </header>
-      <h2 class="pregunta">Qui ets?</h2>
+      <div class="hola entrada-hola"><div class="hola-txt"><h1>Hola! Qui ets?</h1><p>Toca el teu nom per començar.</p></div></div>
       <div class="alumnes">
         ${llista.map(a => `<button class="alumne sel" data-id="${a.id}">${avatar(a.nom)}<span>${esc(a.nom)}</span></button>`).join("")}
         <button class="alumne nou sel" data-nou><span class="avatar mes">+</span><span>Alumne nou</span></button>
@@ -354,15 +364,17 @@
     const pags = Math.max(1, Math.ceil(llista.length / PER_PAG));
     pag = Math.min(Math.max(0, pag), pags - 1);
     const vis = llista.slice(pag * PER_PAG, pag * PER_PAG + PER_PAG);
+    const fetes = fetesDe(id);
     app.innerHTML = `<section class="pantalla bloc-${id}">
       <header class="cap">
         <button class="btn-ico gran sel" data-go="inici" aria-label="Inici">${ICO.casa}</button>
-        <div class="titol"><h2>${esc(b.nom)}</h2><span class="sub">${llista.length} activitats · Coneixement de l'entorn natural</span></div>
+        <span class="xapa ${b.color}"><img src="${src(ICONES[b.icones[0]])}" alt=""></span>
+        <div class="titol"><h2>${esc(b.nom)}</h2><span class="sub">${fetes.size} de ${llista.length} activitats fetes · ${esc(alumne.nom)}</span></div>
         ${pags > 1 ? `<div class="pagina"><button class="btn-ico sel" data-pag="${pag - 1}" ${pag === 0 ? "disabled" : ""} aria-label="Anterior">${ICO.enrere}</button>
           <span>${pag + 1} / ${pags}</span><button class="btn-ico sel" data-pag="${pag + 1}" ${pag === pags - 1 ? "disabled" : ""} aria-label="Següent">${ICO.endavant}</button></div>` : ""}
       </header>
       <div class="acts">${vis.map(a => `<button class="act sel" data-act="${a.codi}">
-          <span class="fila1"><span class="codi">${a.codi}</span><span class="nivell" title="Nivell ${a.nivell}">${[1, 2, 3].map(n => `<i class="${n <= a.nivell ? "on" : ""}"></i>`).join("")}</span></span>
+          <span class="fila1"><span class="codi">${a.codi}</span>${fetes.has(a.codi) ? `<span class="feta">${ICO.ok} Feta</span>` : ""}<span class="nivell" title="Nivell ${a.nivell}">${[1, 2, 3].map(n => `<i class="${n <= a.nivell ? "on" : ""}"></i>`).join("")}</span></span>
           <span class="mini">${miniatures(a)}</span>
           <span class="t">${esc(a.titol)}</span>
           <span class="xips"><span class="xip">${esc(TIPUS[a.tipus])}</span>${a.origen === "fitxa" ? `<span class="xip fitxa" title="${esc(a.font || "")}">Fitxa original</span>` : `<span class="xip">Ampliació</span>`}</span>
@@ -389,7 +401,7 @@
     rondes: a => { const ws = paraulesDe(a); return sample(ws, C.rondes).map(w => ({ w, ops: opcionsAmb(w, ws, a.opcions || 3) })); },
     pinta(r, e, api) {
       e.innerHTML = `<div class="dos"><div><div class="zona"><div class="ajust">${picto(r.w, false)}</div></div></div>
-        <div class="paraules">${r.ops.map(o => `<button class="paraula opc sel fz${V[o].t}" data-w="${esc(o)}"><span style="font-size:min(48cqh, ${ajusta(o, 92, 11).toFixed(2)}cqw, 90px)">${esc(o)}</span></button>`).join("")}</div></div>`;
+        <div class="paraules">${r.ops.map(o => `<button class="paraula opc sel" data-w="${esc(o)}"><span style="font-size:min(48cqh, ${ajusta(o, 92, 11).toFixed(2)}cqw, 90px)">${esc(o)}</span></button>`).join("")}</div></div>`;
       api.opcions(e, o => o === r.w, r.w);
     }
   };
@@ -397,7 +409,7 @@
   T.llegeix = {
     rondes: a => { const ws = paraulesDe(a); return sample(ws, C.rondes).map(w => ({ w, ops: opcionsAmb(w, ws, a.opcions || 3) })); },
     pinta(r, e, api) {
-      e.innerHTML = `<div class="paraula-gran fz${V[r.w].t}"><span style="font-size:min(clamp(40px, 9vmin, 120px), ${ajusta(r.w, 92, 60).toFixed(2)}cqw)">${esc(r.w)}</span></div>
+      e.innerHTML = `<div class="paraula-gran"><span style="font-size:min(clamp(40px, 9vmin, 120px), ${ajusta(r.w, 92, 60).toFixed(2)}cqw)">${esc(r.w)}</span></div>
         <div class="zona"><div class="ajust" style="--cols:${r.ops.length}">${r.ops.map(o => `<button class="opc sel" data-w="${esc(o)}">${picto(o, false)}</button>`).join("")}</div></div>`;
       api.opcions(e, o => o === r.w, r.w);
     }
@@ -590,7 +602,7 @@
       for (let cols = 2; cols <= n; cols++) { const rows = Math.ceil(n / cols); const sz = Math.min(amp / cols, alt / rows); if (sz > millor.sz) millor = { cols, rows, sz }; }
       e.innerHTML = `<div class="zona"><div class="ajust" style="--cols:${millor.cols};--rows:${millor.rows}">${cartes.map((c, i) => {
         const m = midaLletra(c.w);
-        const cara = c.k === "p" ? picto(c.w) : `<div class="picto fz${V[c.w].t}"><div class="paraula-carta" style="--fs:${ajusta(c.w, 80, 18).toFixed(2)}"><span>${m.html}</span></div></div>`;
+        const cara = c.k === "p" ? picto(c.w) : `<div class="picto"><div class="paraula-carta" style="--fs:${ajusta(c.w, 80, 18).toFixed(2)}"><span>${m.html}</span></div></div>`;
         return `<button class="carta opc sel" data-i="${i}" data-w="${esc(c.w)}"><div class="cos"><div class="dors"><span>?</span></div><div class="cara">${cara}</div></div></button>`;
       }).join("")}</div></div>`;
       let oberta = null, trobades = 0, bloc = false;
@@ -644,7 +656,7 @@
       if (estat.i >= rondes.length) return final();
       const r = rondes[estat.i];
       estat.errorsRonda = 0; estat.ocupat = false; estat.objectiu = objectiuDe(r); M.pausaFins = performance.now() + 700;
-      app.innerHTML = `<section class="pantalla">
+      app.innerHTML = `<section class="pantalla bloc-${a.bloc}">
         <header class="cap">
           <button class="btn-ico gran sel" data-tornar aria-label="Tornar a ${esc(BLOCS.find(b => b.id === a.bloc).nom)}">${ICO.enrere}</button>
           <div class="titol"><span class="sub"><span class="codi">${a.codi}</span> &nbsp;${esc(TIPUS[a.tipus])}</span><h2>${esc(a.titol)}</h2></div>
