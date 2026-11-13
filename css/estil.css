@@ -456,3 +456,96 @@ html.mirada #punter.actiu { display: block; }
 .top .eines { align-items: center; }
 .peu-entrada { margin-top: auto; padding-top: 16px; }
 .peu b { font-weight: 600; }
+
+/* ================================================================
+   INTRODUCCIÓ ANIMADA (escena de dia: colors propis, no depèn del tema)
+   ================================================================ */
+#intro { position: fixed; inset: 0; z-index: 300; overflow: hidden; cursor: pointer;
+  background: linear-gradient(#aee0ff 0%, #d6f1ff 45%, #eefbe6 78%, #7cc163 78.1%); transition: opacity .45s ease; }
+#intro.surt { opacity: 0; pointer-events: none; }
+.intro-escena { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.intro-escena .planta { transform-box: fill-box; transform-origin: 50% 100%; transform: scale(0);
+  transition: transform .95s cubic-bezier(.3, 1.6, .5, 1); transition-delay: var(--d, 0s); }
+.intro-escena .creix .planta { transform: scale(1); }
+.intro-escena .papallona { opacity: 0; transition: opacity .6s ease .5s; }
+.intro-escena .creix .papallona { opacity: 1; }
+.intro-escena .creix .papallona.p1 { animation: vola1 5s ease-in-out infinite; }
+.intro-escena .creix .papallona.p2 { animation: vola2 6s ease-in-out infinite; }
+.intro-escena .ales { animation: aleteig .28s ease-in-out infinite alternate; }
+.intro-escena .aspes { animation: gira 1.6s linear infinite; }
+.intro-escena .raigs { animation: gira 40s linear infinite; }
+.intro-escena .n1 { animation: nuvol 26s linear infinite alternate; }
+.intro-escena .n2 { animation: nuvol 34s linear infinite alternate-reverse; }
+.intro-escena .n3 { animation: nuvol 30s linear infinite alternate; }
+@keyframes gira { to { transform: rotate(360deg); } }
+@keyframes aleteig { from { transform: scaleX(1); } to { transform: scaleX(.35); } }
+@keyframes vola1 { 0%,100% { transform: translate(0, 0); } 30% { transform: translate(60px, -50px); } 65% { transform: translate(-40px, -90px); } }
+@keyframes vola2 { 0%,100% { transform: translate(0, 0); } 35% { transform: translate(-70px, -40px); } 70% { transform: translate(50px, -80px); } }
+@keyframes nuvol { from { translate: -40px 0; } to { translate: 70px 0; } }
+.intro-logo { position: absolute; left: 0; top: 0; width: 120px; will-change: transform; transform: translate(-300px, -300px); z-index: 3; }
+.intro-logo-in { transform-origin: 50% 100%; filter: drop-shadow(0 10px 14px rgba(32, 56, 109, .28)); }
+.intro-logo.quiet { left: 50%; top: 8%; transform: translateX(-50%); }
+.cara { display: block; width: 100%; height: auto; }
+.cara .ull { transition: transform .11s ease; transform-origin: 603px 367px; }
+.cara.ullet .ull { transform: scaleY(.07); }
+.cara .boca { transition: transform .15s ease; transform-origin: 634px 527px; }
+.cara.ullet .boca { transform: scale(1.18, 1.25); }
+.cara.parpelleja .ull { animation: parpelleig 5s ease-in-out infinite; }
+@keyframes parpelleig { 0%, 92%, 100% { transform: scaleY(1); } 95%, 97% { transform: scaleY(.07); } }
+.intro-bafarada { position: absolute; left: 78%; bottom: 82%; white-space: nowrap; background: #fff; color: #20386D; font: 800 clamp(16px, 2.2vw, 30px)/1 var(--font-ui);
+  padding: .5em .75em; border-radius: 1em 1em 1em .2em; box-shadow: 0 6px 16px rgba(32, 56, 109, .22); animation: entra .3s cubic-bezier(.2, 1.4, .4, 1); }
+.intro-card { position: absolute; left: 50%; top: clamp(150px, 27%, 300px); width: min(92vw, 900px); translate: -50% 0; z-index: 2;
+  display: grid; grid-template-columns: clamp(110px, 20vw, 210px) minmax(0, 1fr); align-items: center; gap: clamp(14px, 2.6vw, 32px);
+  background: #fff; color: #20386D; border-radius: 34px; padding: clamp(40px, 6vh, 64px) clamp(18px, 3vw, 40px) clamp(16px, 3vh, 28px);
+  box-shadow: 0 24px 60px rgba(32, 56, 109, .28); opacity: 0; transform: translateY(40px) scale(.9); pointer-events: none;
+  transition: opacity .45s ease, transform .6s cubic-bezier(.2, 1.4, .4, 1); }
+.intro-card.surt-titol { opacity: 1; transform: none; }
+.intro-txt p { margin: 0; font: 600 clamp(15px, 2vw, 24px)/1.2 var(--font-ui); color: #EA6B22; }
+.intro-txt h1 { margin: .15em 0 .3em; font: 800 clamp(22px, 4.2vw, 50px)/1.02 var(--font-ui); letter-spacing: -.02em; text-wrap: balance; }
+.intro-txt img { display: block; height: clamp(46px, 10vh, 84px); width: auto; }
+.intro-salta, .intro-so { position: absolute; z-index: 4; border: 0; cursor: pointer; font: 700 18px/1 var(--font-ui); padding: 16px 22px; border-radius: 999px;
+  background: rgba(255, 255, 255, .92); color: #20386D; box-shadow: 0 4px 14px rgba(32, 56, 109, .2); }
+.intro-salta { right: max(16px, env(safe-area-inset-right, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); }
+.intro-so { left: max(16px, env(safe-area-inset-left, 0px)); top: calc(16px + env(safe-area-inset-top, 0px)); background: #20386D; color: #fff; }
+@media (max-width: 560px) { .intro-card { grid-template-columns: 1fr; justify-items: center; text-align: center; } .intro-picto { width: 120px; } .intro-txt img { margin-inline: auto; } }
+
+/* ================================================================
+   PANTALLA D'ELECCIÓ D'ALUMNE · més contrast, botons de color
+   ================================================================ */
+.entrada { gap: clamp(14px, 2.4vh, 24px); }
+.entrada-hero { display: flex; align-items: center; gap: clamp(14px, 2.4vw, 28px); flex-wrap: wrap; position: relative; isolation: isolate; overflow: hidden;
+  background: linear-gradient(135deg, #2b4a94, #20386D 65%); color: #fff; border-radius: 30px; padding: clamp(18px, 3vw, 34px); box-shadow: var(--sombra); }
+.entrada-hero::before { content: ""; position: absolute; z-index: -1; width: 46%; aspect-ratio: 1; right: -10%; top: -70%; border-radius: 50%; background: rgba(255, 255, 255, .08); }
+.entrada-hero::after { content: ""; position: absolute; z-index: -1; width: 16%; aspect-ratio: 1; right: 30%; bottom: -70%; border-radius: 50%; background: rgba(234, 107, 34, .45); }
+.hero-logo { width: clamp(74px, 11vw, 130px); flex: none; filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .25)); }
+.hero-txt { flex: 1; min-width: 200px; }
+.hero-sub { font-weight: 600; font-size: clamp(13px, 1.4vw, 17px); letter-spacing: .04em; color: #ffc9a3; }
+.hero-txt h1 { margin: 2px 0 0; font-size: clamp(32px, 5.4vw, 66px); font-weight: 800; line-height: 1; letter-spacing: -.03em; }
+.hero-txt p { margin: 8px 0 0; font-size: clamp(17px, 2vw, 24px); font-weight: 500; opacity: .9; }
+.entrada-hero .eines { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.entrada-hero .btn-txt, .entrada-hero .btn-ico { background: #fff; color: #20386D; }
+.entrada-hero .btn-txt.prim { background: #EA6B22; color: #fff; }
+.entrada .alumnes { grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr)); gap: clamp(12px, 2vmin, 22px); }
+.entrada .alumne { --c: #4a57d6; position: relative; isolation: isolate; overflow: hidden; flex-direction: column; align-items: flex-start; justify-content: space-between;
+  text-align: left; gap: 18px; min-height: clamp(170px, 26vh, 230px); padding: clamp(16px, 2.2vw, 26px); border: 0; border-radius: 30px; color: #fff;
+  background: linear-gradient(140deg, color-mix(in srgb, var(--c) 80%, #fff), var(--c) 62%);
+  box-shadow: 0 2px 4px rgba(23, 26, 44, .1), 0 12px 26px color-mix(in srgb, var(--c) 34%, transparent); transition: transform .2s ease; }
+.entrada .alumne:hover, .entrada .alumne.mirant { transform: translateY(-4px) scale(1.02); }
+.entrada .alumne::before { content: ""; position: absolute; z-index: -1; width: 80%; aspect-ratio: 1; right: -28%; bottom: -46%; border-radius: 50%; background: rgba(255, 255, 255, .14); }
+.entrada .alumne::after { content: ""; position: absolute; z-index: -1; width: 30%; aspect-ratio: 1; right: 12%; top: -14%; border-radius: 50%; background: rgba(255, 255, 255, .1); }
+.inicial { width: clamp(64px, 8vw, 92px); aspect-ratio: 1; display: grid; place-items: center; border-radius: 26%; background: #fff; color: var(--c);
+  font: 800 clamp(36px, 4.6vw, 54px)/1 var(--font-ui); transform: rotate(-6deg); box-shadow: 0 10px 22px rgba(0, 0, 0, .2); }
+.nom-al { font-size: clamp(24px, 2.8vw, 36px); font-weight: 800; letter-spacing: -.02em; line-height: 1.05; overflow-wrap: anywhere; min-width: 0; }
+.entrada .alumne.nou { background: var(--ink); color: var(--bg); box-shadow: var(--sombra); border: 0; }
+.entrada .alumne.nou .inicial { background: #EA6B22; color: #fff; transform: rotate(6deg); }
+.entrada .alumne.nou .nom-al { white-space: nowrap; }
+.marca-logo { width: 34px; flex: none; display: inline-block; }
+.marca { color: var(--ink); }
+.marca .cara { width: 100%; height: auto; padding: 0; background: none; border-radius: 0; }
+.intro-logo.dreta .intro-bafarada { left: auto; right: 78%; border-radius: 1em 1em .2em 1em; }
+.entrada .alumne.nou .nom-al { font-size: clamp(22px, 2.3vw, 30px); }
+@media (max-width: 560px) {
+  .entrada .alumne { flex-direction: row; align-items: center; justify-content: flex-start; min-height: 104px; gap: 16px; }
+  .inicial { width: 64px; }
+  .entrada-hero .eines { width: 100%; }
+}

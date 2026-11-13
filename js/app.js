@@ -16,6 +16,8 @@
     punt: 44,            // mida del punt (px)
     rondes: 8,
     so: true,
+    intro: true,         // animació d'entrada amb el logotip
+    musica: true,        // música i sons de l'animació d'entrada
     motor: "sistema",    // "sistema" | "ona"
     veuSistema: "",
     velocitat: 0.95,
@@ -252,7 +254,7 @@
   function pintaPortada() {
     app.innerHTML = `<section class="pantalla portada">
       <header class="top">
-        <div class="marca">${ICO.fulla}<span>Coneixement de l'entorn natural</span></div>
+        <div class="marca"><span class="marca-logo">${window.Intro.cara()}</span><span>AREMI · Coneixement de l'entorn natural</span></div>
         <div class="eines">
           <button class="btn-ico sel" data-go="vocabulari" aria-label="Vocabulari">${ICO.llibre}</button>
           <button class="btn-ico sel" data-go="seguiment" aria-label="Zona del professional">${ICO.config}</button>
@@ -292,18 +294,19 @@
   function connectaMirada(repinta) {
     on("[data-mirada]", () => { C.mirada = !C.mirada; aplicaMirada(); repinta(); });
   }
+  const COLORS_AL = ["#4a57d6", "#0e9a72", "#f0663a", "#a245cf", "#e23e74", "#0b86b0", "#c27803", "#5a67d8"];
   function pintaEntrada() {
     const llista = D.alumnes.slice().sort((a, b) => a.nom.localeCompare(b.nom, "ca"));
-    app.innerHTML = `<section class="pantalla scroll portada">
-      <header class="top">
-        <div class="marca">${ICO.fulla}<span>Coneixement de l'entorn natural</span></div>
+    app.innerHTML = `<section class="pantalla scroll entrada">
+      <header class="entrada-hero">
+        <span class="hero-logo">${window.Intro.cara("parpelleja")}</span>
+        <div class="hero-txt"><span class="hero-sub">AREMI · Coneixement de l'entorn natural</span><h1>Hola! Qui ets?</h1><p>Toca el teu nom per començar.</p></div>
         <div class="eines">${botoMirada()}
           <button class="btn-ico sel" data-go="seguiment" aria-label="Zona del professional">${ICO.config}</button></div>
       </header>
-      <div class="hola entrada-hola"><div class="hola-txt"><h1>Hola! Qui ets?</h1><p>Toca el teu nom per començar.</p></div></div>
       <div class="alumnes">
-        ${llista.map(a => `<button class="alumne sel" data-id="${a.id}">${avatar(a.nom)}<span>${esc(a.nom)}</span></button>`).join("")}
-        <button class="alumne nou sel" data-nou><span class="avatar mes">+</span><span>Alumne nou</span></button>
+        ${llista.map((a, k) => `<button class="alumne sel" data-id="${a.id}" style="--c:${COLORS_AL[k % COLORS_AL.length]}"><span class="inicial">${esc(a.nom.trim()[0] || "?").toUpperCase()}</span><span class="nom-al">${esc(a.nom)}</span></button>`).join("")}
+        <button class="alumne nou sel" data-nou><span class="inicial">+</span><span class="nom-al">Alumne nou</span></button>
       </div>
       ${llista.length ? "" : `<p class="nota-buida">Encara no hi ha cap alumne. Toca «Alumne nou» per crear-ne un.</p>`}
       <div class="peu peu-entrada">${CREDITS}</div>
@@ -775,6 +778,9 @@
         <section class="seccio"><h3>Activitats</h3>
           <div class="opcio"><span class="lbl">Preguntes per activitat</span>${seg("rondes", [[5, "5"], [8, "8"], [10, "10"], [12, "12"]])}</div>
           <div class="opcio"><span class="lbl">So de reforç</span>${seg("so", [[true, "Sí"], [false, "No"]])}</div>
+          <div class="opcio"><span class="lbl">Animació d'entrada</span>${seg("intro", [[true, "Sí"], [false, "No"]])}</div>
+          <div class="opcio"><span class="lbl">Música de l'animació</span>${seg("musica", [[true, "Sí"], [false, "No"]])}</div>
+          <div class="opcio"><button class="btn-txt sel" data-veu-intro>Torna a veure l'animació</button></div>
           <p class="nota">Quan l'alumne encerta: so curt, la casella es posa verda i la veu diu la paraula. La felicitació surt en acabar l'activitat. Quan s'equivoca: la veu diu el pictograma o la paraula triada i «Torna-ho a provar».</p>
         </section>
         <section class="seccio"><h3>Codi PIN</h3>
@@ -783,6 +789,7 @@
         </section>
       </div></section>`;
     connectaProf();
+    on("[data-veu-intro]", () => fesIntro(() => {}));
     on("[data-canvia-pin]", () => { D.pin = null; desaD(); profOk = false; vesA("configuracio"); });
     on("[data-set]", e => { const b = e.currentTarget; C[b.dataset.set] = JSON.parse(b.dataset.v); desa(); aplicaMirada();
       if (b.dataset.set === "onaModel") Veu.cache.clear();
@@ -1030,6 +1037,13 @@
     try { actx = actx || new (window.AudioContext || window.webkitAudioContext)(); actx.resume(); } catch (e) {}
   }, { once: true });
   if (!alumne && location.hash && !["#nou-alumne", "#seguiment", "#gestio-alumnes", "#configuracio"].includes(location.hash)) history.replaceState(null, "", "#entrar");
+  // animació d'entrada: el pictograma del títol porta la clau Fitzgerald com la resta
+  function fesIntro(fet) {
+    const nom = "CONEIXEMENT DEL MEDI";
+    const pic = `<div class="picto fz2 intro-picto"><div class="pin"><span class="ptx" style="--fs:${ajusta(nom, 80, 15).toFixed(2)}">${nom}</span><img src="pictos/32542.png" alt="" draggable="false"></div></div>`;
+    window.Intro.play({ picto: pic, musica: C.musica }, fet);
+  }
   ruta();
+  if (C.intro) fesIntro(() => {});
   Veu.comprovaOna().then(ok => { if (ok) Veu.preescalfa([...LLOANCES, "Torna-ho a provar."]); });
 })();

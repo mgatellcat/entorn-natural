@@ -19,6 +19,8 @@ Accés tàctil i amb la mirada (Tobii + TD Control).
 | `js/vocabulari.js` | **Vocabulari**: paraula → pictograma ARASAAC, tipus Fitzgerald, article, síl·labes, temes |
 | `js/activitats.js` | **Activitats**: codi, bloc, títol, tipus, tema, nivell, origen |
 | `js/app.js` | Motor de l'app (no cal tocar-lo per afegir activitats) |
+| `js/intro.js` | Animació d'entrada amb el logotip d'AREMI |
+| `img/` | Logotip d'AREMI |
 | `js/vendor/` | Biblioteca de la veu Ona (Piper, llicència MIT) |
 | `pictos/` | Pictogrames ARASAAC descarregats (funcionen sense internet) |
 
@@ -31,6 +33,14 @@ Cada activitat indica si ve d'una **fitxa original** (PDF en paper) o és una **
 
 `associa` (picto → paraula) · `llegeix` (paraula → picto) · `inicial` · `lletra` · `sillabes` · `omple` (graella) ·
 `classifica` · `relaciona` · `memory` · `intrus` · `escolta` · `sino` · `endevinalla`
+
+## Animació d'entrada
+
+En obrir l'app, el logotip d'AREMI salta per l'hort de palets adaptats i pel jardí sensorial, i les plantes creixen
+quan hi passa. Després surt el títol amb el pictograma d'ARASAAC i es passa a triar l'alumne.
+Es pot saltar tocant la pantalla o amb el botó «Salta». La música i els sons els genera el navegador (`js/intro.js`);
+alguns navegadors no deixen sonar res fins que es toca la pantalla: aleshores surt el botó «Activa la música».
+A *Configuració → Activitats* es pot desactivar l'animació o la música.
 
 ## Alumnes i seguiment
 
