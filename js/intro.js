@@ -234,5 +234,31 @@ window.Intro = (() => {
     raf = requestAnimationFrame(pas);
   }
 
-  return { play, cara };
+  /* ---------- pantalla d'inici: cal un toc perquè el navegador deixi sonar la música ---------- */
+  function inici(opts, fet) {
+    opts = opts || {};
+    const el = document.createElement("div");
+    el.id = "inici"; el.setAttribute("role", "button"); el.tabIndex = 0; el.setAttribute("aria-label", "Toca per començar");
+    el.innerHTML = `<div class="intro-card fixa">
+        <span class="inici-cara">${cara("parpelleja")}</span>
+        ${opts.picto || ""}
+        <div class="intro-txt"><p>Benvinguts i benvingudes a les</p><h1>ACTIVITATS DE CONEIXEMENT DE L'ENTORN NATURAL</h1>
+          <img src="img/aremi-nom.png" alt="AREMI, Centre d'Educació Especial"></div>
+        <span class="inici-boto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z" fill="currentColor"/></svg>Toca per començar</span>
+      </div>`;
+    document.body.appendChild(el);
+    let fetJa = false;
+    const va = () => {
+      if (fetJa) return; fetJa = true;
+      document.removeEventListener("keydown", tecla);
+      play(opts, fet);                       // dins del toc: la música pot sonar de seguida
+      el.classList.add("surt"); setTimeout(() => el.remove(), 450);
+    };
+    const tecla = e => { if (["Enter", " "].includes(e.key)) { e.preventDefault(); va(); } };
+    el.addEventListener("click", va);
+    document.addEventListener("keydown", tecla);
+    try { el.focus({ preventScroll: true }); } catch (e) {}
+  }
+
+  return { play, inici, cara };
 })();

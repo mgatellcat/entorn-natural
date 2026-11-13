@@ -36,7 +36,8 @@ Cada activitat indica si ve d'una **fitxa original** (PDF en paper) o és una **
 
 ## Animació d'entrada
 
-En obrir l'app, el logotip d'AREMI salta per l'hort de palets adaptats i pel jardí sensorial, i les plantes creixen
+En obrir l'app surt una pantalla de benvinguda amb el cartell d'AREMI i el botó «Toca per començar» (cal un toc perquè
+el navegador deixi sonar la música). Després, el logotip d'AREMI salta per l'hort de palets adaptats i pel jardí sensorial, i les plantes creixen
 quan hi passa. Després surt el títol amb el pictograma d'ARASAAC i es passa a triar l'alumne.
 Es pot saltar tocant la pantalla o amb el botó «Salta». La música i els sons els genera el navegador (`js/intro.js`);
 alguns navegadors no deixen sonar res fins que es toca la pantalla: aleshores surt el botó «Activa la música».

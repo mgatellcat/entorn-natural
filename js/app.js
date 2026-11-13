@@ -1038,12 +1038,13 @@
   }, { once: true });
   if (!alumne && location.hash && !["#nou-alumne", "#seguiment", "#gestio-alumnes", "#configuracio"].includes(location.hash)) history.replaceState(null, "", "#entrar");
   // animació d'entrada: el pictograma del títol porta la clau Fitzgerald com la resta
-  function fesIntro(fet) {
+  function fesIntro(fet, ambInici) {
     const nom = "CONEIXEMENT DEL MEDI";
     const pic = `<div class="picto fz2 intro-picto"><div class="pin"><span class="ptx" style="--fs:${ajusta(nom, 80, 15).toFixed(2)}">${nom}</span><img src="pictos/32542.png" alt="" draggable="false"></div></div>`;
-    window.Intro.play({ picto: pic, musica: C.musica }, fet);
+    // en obrir l'app: primer la pantalla d'inici (un toc), després l'animació amb música
+    (ambInici ? window.Intro.inici : window.Intro.play)({ picto: pic, musica: C.musica }, fet);
   }
   ruta();
-  if (C.intro) fesIntro(() => {});
+  if (C.intro) fesIntro(() => {}, true);
   Veu.comprovaOna().then(ok => { if (ok) Veu.preescalfa([...LLOANCES, "Torna-ho a provar."]); });
 })();
